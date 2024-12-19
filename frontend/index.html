@@ -1,10 +1,884 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title></title>
-  </head>
-  <body>
-    Well hey there!!!
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <title>LockChain - Securing Your Most Valuable Documents with Blockchain Technology</title>
+    <!-- Include Web3.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.7.4/dist/web3.min.js"></script>
+    <!-- Include Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <!-- Include QRCode.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        /* Reset default browser styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Background Shapes */
+        .background-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: rgba(30, 66, 159, 0.05);
+            border: 2px solid rgba(30, 66, 159, 0.1);
+            border-radius: 12px;
+            animation: float 25s infinite ease-in-out;
+        }
+
+        /* Positioning shapes at different locations */
+        .shape.one {
+            top: 10%;
+            left: 15%;
+            animation-duration: 30s;
+            background: rgba(30, 66, 159, 0.07);
+        }
+
+        .shape.two {
+            top: 40%;
+            left: 70%;
+            animation-duration: 35s;
+            background: rgba(30, 66, 159, 0.05);
+        }
+
+        .shape.three {
+            top: 70%;
+            left: 20%;
+            animation-duration: 40s;
+            background: rgba(30, 66, 159, 0.06);
+        }
+
+        .shape.four {
+            top: 20%;
+            left: 50%;
+            animation-duration: 32s;
+            background: rgba(30, 66, 159, 0.04);
+        }
+
+        /* Animation for floating shapes */
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(360deg); }
+            100% { transform: translateY(0) rotate(720deg); }
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background-color: #1e429f;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .navbar h1 {
+            color: #fff;
+            font-size: 28px;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent */
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container h2, .container h3, .container h4 {
+            color: #1e429f;
+            margin-bottom: 15px;
+        }
+
+        .container p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .container ul, .container ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .container li {
+            margin-bottom: 10px;
+        }
+
+        /* Buttons */
+        button {
+            background-color: #1e429f;
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #163d7a;
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Input Fields */
+        input[type="file"] {
+            margin-bottom: 20px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        /* Hash Output */
+        #hashOutput {
+            font-weight: bold;
+            margin: 20px 0;
+            word-break: break-all;
+            color: #1e429f;
+        }
+
+        /* Receipt */
+        #receipt {
+            border: 2px solid #1e429f;
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 8px;
+            background-color: #e6f0ff;
+            display: none;
+        }
+
+        #receipt h3 {
+            margin-bottom: 15px;
+            color: #1e429f;
+        }
+
+        #qrCode {
+            margin-top: 20px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #777;
+            font-size: 14px;
+        }
+
+        /* Loading Overlay */
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(30, 66, 159, 0.8); /* Semi-transparent background */
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 1000; /* Ensure it overlays other elements */
+        }
+
+        #loadingOverlay .loader {
+            border: 12px solid #f3f3f3; /* Light grey */
+            border-top: 12px solid #1e429f; /* Blue */
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            animation: spin 1.5s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        #loadingOverlay p {
+            color: #fff;
+            font-size: 18px;
+            text-align: center;
+            max-width: 80%;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px;
+                padding: 20px;
+            }
+
+            button {
+                width: 100%;
+                margin: 10px 0;
+            }
+
+            .shape {
+                width: 120px;
+                height: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Shapes -->
+    <div class="background-shapes">
+        <div class="shape one"></div>
+        <div class="shape two"></div>
+        <div class="shape three"></div>
+        <div class="shape four"></div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <h1> TESTING Lock down your PDF files with LockChain</h1>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <h2>Welcome to LockChain: Securing Your Most Valuable Documents with Blockchain Technology</h2>
+        <p>In an era where digital information is paramount, ensuring the authenticity and security of your important documents is more critical than ever. <strong>LockChain</strong> offers a revolutionary solution that empowers you to protect, verify, and manage your documents with confidence.</p>
+
+        <h3>Why Choose LockChain?</h3>
+
+        <h4>1. Immutable Proof of Ownership</h4>
+        <p>LockChain leverages blockchain technology to create a permanent, tamper-proof record of your documents. By registering a unique digital fingerprint (hash) of your file, you establish undeniable proof of its existence and ownership at a specific point in time.</p>
+
+        <h4>2. Enhanced Security</h4>
+        <p>Traditional methods of document storage and verification are vulnerable to manipulation and fraud. LockChain's decentralized platform ensures that once your document is registered, it cannot be altered or forged without detection, providing unparalleled security.</p>
+
+        <h4>3. Easy Verification</h4>
+        <p>Verifying the authenticity of a document has never been simpler. Whether you're a business partner, legal entity, or individual, you can quickly confirm a document's integrity through our user-friendly interface without exposing its sensitive content.</p>
+
+        <h4>4. Privacy Protection</h4>
+        <p>Your documents remain confidential. LockChain only stores the hash of your document, not the document itself. This means your private information stays with you, reducing the risk of data breaches and unauthorized access.</p>
+
+        <h4>5. Cost-Effective and Efficient</h4>
+        <p>Say goodbye to expensive third-party verification services and lengthy authentication processes. <strong>For a low fee of just <span id="dynamicFee">0.001 ETH</span> (plus applicable gas fees)</strong>, LockChain offers a swift, affordable way to secure your documents, saving you time and resources.</p>
+
+        <h3>Who Can Benefit from LockChain?</h3>
+        <ul>
+            <li><strong>Legal Professionals</strong>: Secure contracts, wills, and legal agreements with a verifiable timestamp.</li>
+            <li><strong>Artists and Creators</strong>: Protect intellectual property like artworks, manuscripts, and designs from infringement.</li>
+            <li><strong>Businesses</strong>: Safeguard important corporate documents, financial records, and communications.</li>
+            <li><strong>Educators and Students</strong>: Authenticate diplomas, transcripts, and certificates to prevent academic fraud.</li>
+            <li><strong>Everyone</strong>: From personal identification documents to important receipts, anyone can benefit from added security.</li>
+        </ul>
+
+        <h3>Get Started with LockChain Today</h3>
+        <p>Join a community that values security, transparency, and peace of mind. Using LockChain is straightforward:</p>
+        <ol>
+            <li><strong>Connect Your Wallet</strong>: Easily link your MetaMask or preferred Ethereum wallet.</li>
+            <li><strong>Register Your Document</strong>: Upload the file to generate its unique hash and register it on the blockchain.</li>
+            <li><strong>Verify Anytime</strong>: Use LockChain to verify your document's authenticity whenever needed.</li>
+        </ol>
+
+        <p>Protect your most personal assets with technology you can trust. <strong>LockChain</strong> is more than a service; it's your partner in digital security.</p>
+        <p><em>Experience the future of document protection—start using LockChain now!</em></p>
+
+        <!-- Display Current Fee -->
+        <h3>Current Registration Fee: <span id="currentFee">Loading...</span> </h3>
+
+        <!-- Connect Wallet Buttons -->
+        <button onclick="connectWallet('metamask')">Connect MetaMask</button>
+        <button id="coinbaseBtn" onclick="connectWallet('coinbase')">Connect Coinbase Wallet</button>
+        <button id="edgeCoinbaseBtn" onclick="connectEdgeCoinbaseWallet()" style="display: none;">Connect Coinbase Wallet (Edge)</button>
+        <button onclick="disconnectWallet()">Disconnect Wallet</button>
+        <p id="walletAddress">Not connected</p>
+
+        <!-- Hash and Register Document -->
+        <h3>Hash Your PDF Document</h3>
+        <input type="file" id="fileInput" accept=".pdf" /><br>
+        <button onclick="hashDocument()">Hash Document</button>
+
+        <p id="hashOutput"></p>
+
+        <button id="registerButton" onclick="registerHashOnBlockchain()" disabled>
+            Register Hash on Blockchain (Fee: <span id="buttonFee">0.001 ETH</span>)
+        </button>
+        <p id="feeNote">Note: A fee of <span id="feeAmount">0.001 ETH</span> is required to register your document.</p>
+
+        <button onclick="verifyDocument()">Verify Document</button>
+
+        <!-- Receipt -->
+        <div id="receipt">
+            <h3>Transaction Receipt</h3>
+            <p id="receiptContent"></p>
+            <div id="qrCode"></div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay">
+        <div class="loader"></div>
+        <p>Please wait, your transaction is being processed. This may take a couple of minutes.</p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        &copy; 2023 LockChain. All rights reserved.
+    </div>
+
+    <!-- Include the Correct Coinbase Wallet SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@coinbase/wallet-sdk@latest/dist/coinbase-wallet.umd.min.js"></script>
+
+    <!-- Your Custom JavaScript -->
+    <script>
+        let web3;
+        let contract;
+        let account;
+        let hashHex;
+        let selectedProvider;
+        let coinbaseWallet;
+
+        const contractABI = [
+            {
+                "type": "constructor",
+                "inputs": [],
+                "stateMutability": "nonpayable"
+            },
+            {
+                "type": "function",
+                "name": "fee",
+                "inputs": [],
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "getDocumentDetails",
+                "inputs": [
+                    {
+                        "name": "_hash",
+                        "type": "bytes32",
+                        "internalType": "bytes32"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "hash",
+                        "type": "bytes32",
+                        "internalType": "bytes32"
+                    },
+                    {
+                        "name": "timestamp",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "registrant",
+                        "type": "address",
+                        "internalType": "address"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "getFee",
+                "inputs": [],
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "isDocumentRegistered",
+                "inputs": [
+                    {
+                        "name": "_hash",
+                        "type": "bytes32",
+                        "internalType": "bytes32"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "bool",
+                        "internalType": "bool"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "owner",
+                "inputs": [],
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "address",
+                        "internalType": "address"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "registerDocument",
+                "inputs": [
+                    {
+                        "name": "_hash",
+                        "type": "bytes32",
+                        "internalType": "bytes32"
+                    }
+                ],
+                "outputs": [],
+                "stateMutability": "payable"
+            },
+            {
+                "type": "function",
+                "name": "renounceOwnership",
+                "inputs": [],
+                "outputs": [],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "setFee",
+                "inputs": [
+                    {
+                        "name": "_newFee",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "outputs": [],
+                "stateMutability": "nonpayable"
+            },
+            {
+                "type": "function",
+                "name": "transferOwnership",
+                "inputs": [
+                    {
+                        "name": "",
+                        "type": "address",
+                        "internalType": "address"
+                    }
+                ],
+                "outputs": [],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "withdrawFees",
+                "inputs": [],
+                "outputs": [],
+                "stateMutability": "nonpayable"
+            },
+            {
+                "type": "event",
+                "name": "DocumentRegistered",
+                "inputs": [
+                    {
+                        "name": "hash",
+                        "type": "bytes32",
+                        "indexed": true,
+                        "internalType": "bytes32"
+                    },
+                    {
+                        "name": "registrant",
+                        "type": "address",
+                        "indexed": true,
+                        "internalType": "address"
+                    },
+                    {
+                        "name": "timestamp",
+                        "type": "uint256",
+                        "indexed": false,
+                        "internalType": "uint256"
+                    }
+                ],
+                "anonymous": false
+            },
+            {
+                "type": "event",
+                "name": "OwnershipTransferred",
+                "inputs": [
+                    {
+                        "name": "previousOwner",
+                        "type": "address",
+                        "indexed": true,
+                        "internalType": "address"
+                    },
+                    {
+                        "name": "newOwner",
+                        "type": "address",
+                        "indexed": true,
+                        "internalType": "address"
+                    }
+                ],
+                "anonymous": false
+            },
+            {
+                "type": "error",
+                "name": "OwnableInvalidOwner",
+                "inputs": [
+                    {
+                        "name": "owner",
+                        "type": "address",
+                        "internalType": "address"
+                    }
+                ]
+            },
+            {
+                "type": "error",
+                "name": "OwnableUnauthorizedAccount",
+                "inputs": [
+                    {
+                        "name": "account",
+                        "type": "address",
+                        "internalType": "address"
+                    }
+                ]
+            }
+        ];
+
+        const contractAddress = '0xca2f282ab9d7b2ae33FDe040142C1c185B6591b4';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (isEdge()) {
+                const coinbaseBtn = document.getElementById('coinbaseBtn');
+                const edgeCoinbaseBtn = document.getElementById('edgeCoinbaseBtn');
+
+                if (coinbaseBtn && edgeCoinbaseBtn) {
+                    coinbaseBtn.style.display = 'none';
+                    edgeCoinbaseBtn.style.display = 'none';
+                } else {
+                    console.error('Button elements not found');
+                }
+            }
+
+            // If the URL has a verifyHash parameter, verify that document automatically
+            const params = new URLSearchParams(window.location.search);
+            const verifyHash = params.get('verifyHash');
+            if (verifyHash) {
+                verifyDocumentByHash(verifyHash);
+            }
+
+            // Check if user is on mobile
+            if (isMobileDevice() && !window.ethereum) {
+                // Show a message or alter UI to guide mobile users
+                alert('If you are on mobile, please open this site inside your wallet app (e.g., MetaMask or Coinbase Wallet) to connect.');
+            }
+        });
+
+        function isEdge() {
+            return navigator.userAgent.indexOf("Edg") > -1;
+        }
+
+        function isMobileDevice() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            // Check for Android
+            if (/android/i.test(userAgent)) {
+                return true;
+            }
+            // Check for iOS devices
+            if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+                return true;
+            }
+            return false;
+        }
+
+        async function connectWallet(wallet) {
+            if (wallet === 'metamask') {
+                if (window.ethereum && window.ethereum.isMetaMask) {
+                    selectedProvider = window.ethereum;
+                } else {
+                    alert('MetaMask is not installed. Please install MetaMask and try again.');
+                    return;
+                }
+            } else if (wallet === 'coinbase') {
+                try {
+                    if (typeof CoinbaseWalletSDK === 'undefined') {
+                        throw new Error('CoinbaseWalletSDK is not loaded');
+                    }
+
+                    coinbaseWallet = new CoinbaseWalletSDK({
+                        appName: 'LockChain',
+                        appLogoUrl: 'https://yourapp.com/logo.png',
+                        darkMode: false
+                    });
+                    const coinbaseProvider = coinbaseWallet.makeWeb3Provider();
+                    selectedProvider = coinbaseProvider;
+                } catch (error) {
+                    console.error('Error initializing Coinbase Wallet SDK:', error);
+                    alert('Error initializing Coinbase Wallet SDK.');
+                    return;
+                }
+            } else {
+                alert('Unsupported wallet selected');
+                return;
+            }
+
+            try {
+                web3 = new Web3(selectedProvider);
+                await selectedProvider.request({ method: 'eth_requestAccounts' });
+                const accounts = await web3.eth.getAccounts();
+                account = accounts[0];
+                document.getElementById('walletAddress').innerText = 'Connected: ' + account;
+                contract = new web3.eth.Contract(contractABI, contractAddress);
+
+                await checkNetwork();
+                await displayCurrentFee();
+
+                console.log('Connected account:', account);
+            } catch (error) {
+                console.error('Error connecting to wallet:', error);
+                alert('Error connecting to wallet.');
+            }
+        }
+
+        async function connectEdgeCoinbaseWallet() {
+            try {
+                if (typeof CoinbaseWalletSDK === 'undefined') {
+                    throw new Error('CoinbaseWalletSDK is not loaded');
+                }
+
+                const coinbaseWalletEdge = new CoinbaseWalletSDK({
+                    appName: 'LockChain',
+                    appLogoUrl: 'https://yourapp.com/logo.png',
+                    darkMode: false
+                });
+                const coinbaseProviderEdge = coinbaseWalletEdge.makeWeb3Provider();
+
+                web3 = new Web3(coinbaseProviderEdge);
+                selectedProvider = coinbaseProviderEdge;
+
+                await selectedProvider.request({ method: 'eth_requestAccounts' });
+                const accounts = await web3.eth.getAccounts();
+                account = accounts[0];
+                document.getElementById('walletAddress').innerText = 'Connected: ' + account;
+                contract = new web3.eth.Contract(contractABI, contractAddress);
+
+                await checkNetwork();
+                await displayCurrentFee();
+
+                console.log('Connected account (Edge):', account);
+            } catch (error) {
+                console.error('Error connecting to Coinbase Wallet on Edge:', error);
+                alert('Error connecting to Coinbase Wallet on Edge.');
+            }
+        }
+
+        function disconnectWallet() {
+            if (selectedProvider && selectedProvider.close) {
+                selectedProvider.close();
+            }
+            selectedProvider = null;
+            web3 = null;
+            account = null;
+            document.getElementById('walletAddress').innerText = 'Not connected';
+            alert('Wallet disconnected');
+        }
+
+        async function displayCurrentFee() {
+            try {
+                const feeInWei = await contract.methods.getFee().call();
+                const feeInEth = web3.utils.fromWei(feeInWei, 'ether');
+                document.getElementById('currentFee').innerText = feeInEth + ' ETH';
+                document.getElementById('buttonFee').innerText = feeInEth + ' ETH';
+                document.getElementById('feeAmount').innerText = feeInEth + ' ETH';
+                document.getElementById('dynamicFee').innerText = feeInEth + ' ETH';
+            } catch (error) {
+                console.error('Error fetching current fee:', error);
+                alert('Error fetching current fee from the contract.');
+            }
+        }
+
+        async function hashDocument() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Please select a PDF file.');
+                return;
+            }
+
+            const arrayBuffer = await file.arrayBuffer();
+            const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            hashHex = '0x' + hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            document.getElementById('hashOutput').innerText = `Document Hash: ${hashHex}`;
+            document.getElementById('registerButton').disabled = false;
+        }
+
+        async function registerHashOnBlockchain() {
+            if (!web3 || !account) {
+                alert('Please connect your wallet first.');
+                return;
+            }
+
+            if (!hashHex) {
+                alert('Please hash a document first.');
+                return;
+            }
+
+            const hashBytes32 = hashHex;
+
+            try {
+                const isRegistered = await contract.methods.isDocumentRegistered(hashBytes32).call();
+                if (isRegistered) {
+                    alert('This document is already registered.');
+                    return;
+                }
+
+                const feeInWei = await contract.methods.getFee().call();
+                document.getElementById('loadingOverlay').style.display = 'flex';
+
+                const receipt = await contract.methods.registerDocument(hashBytes32).send({
+                    from: account,
+                    value: feeInWei
+                });
+
+                console.log('Transaction receipt:', receipt);
+                generateReceipt(hashHex, account, receipt.transactionHash);
+            } catch (error) {
+                console.error('Error registering hash on blockchain:', error);
+                alert('Error registering hash on blockchain. See console for details.');
+            } finally {
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }
+        }
+
+        function generateReceipt(hashHex, account, transactionHash) {
+            const timestamp = new Date().toLocaleString();
+            const receiptContent = `
+                <strong>Document Hash:</strong> ${hashHex}<br>
+                <strong>Registered By:</strong> ${account}<br>
+                <strong>Date and Time:</strong> ${timestamp}<br>
+                <strong>Transaction Hash:</strong> <a href="https://sepolia.etherscan.io/tx/${transactionHash}" target="_blank">${transactionHash}</a>
+            `;
+            document.getElementById('receiptContent').innerHTML = receiptContent;
+            document.getElementById('receipt').style.display = 'block';
+
+            // Use Etherscan transaction URL for the QR code
+            const etherscanTxURL = `https://sepolia.etherscan.io/tx/${transactionHash}`;
+
+            // Generate the QR code
+            const qrCodeDiv = document.getElementById('qrCode');
+            qrCodeDiv.innerHTML = ''; // Clear any previous QR code
+            new QRCode(qrCodeDiv, {
+                text: etherscanTxURL,
+                width: 128,
+                height: 128,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        // Verify document by selecting a file
+        async function verifyDocument() {
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = '.pdf';
+            fileInput.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) {
+                    alert('No file selected.');
+                    return;
+                }
+
+                const arrayBuffer = await file.arrayBuffer();
+                const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const hashHexToVerify = '0x' + hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+                await verifyDocumentByHash(hashHexToVerify);
+            };
+            fileInput.click();
+        }
+
+        // Verify document using a known hash (used when scanning QR code or using URL param)
+        async function verifyDocumentByHash(hashHexToVerify) {
+            if (!web3) {
+                // We need to ensure web3 and contract are initialized before verifying
+                // Attempt to re-initialize with a default provider (no wallet needed for view)
+                if (typeof Web3 !== 'undefined') {
+                    web3 = new Web3('https://sepolia.infura.io/v3/YOUR_INFURA_PROJECT_ID');
+                    // Replace with your own Infura endpoint if needed
+                    contract = new web3.eth.Contract(contractABI, contractAddress);
+                } else {
+                    alert('Web3 not found. Please connect a wallet or check your setup.');
+                    return;
+                }
+            }
+
+            try {
+                const isRegistered = await contract.methods.isDocumentRegistered(hashHexToVerify).call();
+                if (isRegistered) {
+                    const details = await contract.methods.getDocumentDetails(hashHexToVerify).call();
+                    alert(`Document is registered.\nRegistrant: ${details.registrant}\nTimestamp: ${new Date(details.timestamp * 1000).toLocaleString()}`);
+                } else {
+                    alert('Document is not registered.');
+                }
+            } catch (error) {
+                console.error('Error verifying document:', error);
+                alert('Error verifying document.');
+            }
+        }
+
+        async function checkNetwork() {
+            const chainId = await web3.eth.getChainId();
+            if (chainId !== 11155111) { // Sepolia's chain ID
+                try {
+                    await selectedProvider.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: '0xaa36a7' }],
+                    });
+                } catch (switchError) {
+                    if (switchError.code === 4902) {
+                        alert('Please add the Sepolia network to your wallet.');
+                    } else {
+                        console.error('Error switching network:', switchError);
+                    }
+                }
+            }
+        }
+    </script>
+</body>
 </html>
