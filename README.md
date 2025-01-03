@@ -61,20 +61,29 @@ Refer to the Foundry Book for installation instructions.
 Compile the Contract (optional):
 
 bash
-Copy code
-forge build
-Run Tests (optional):
 
-bash
-Copy code
+forge build
+
+Run Tests (optional):
 forge test
+
 Deployment
 Deploy the OwnableLockChain contract to the Ethereum network (e.g., Sepolia testnet) using your preferred method:
 
-bash
-Copy code
+
 forge create --rpc-url <YOUR_RPC_URL> --private-key <YOUR_PRIVATE_KEY> src/OwnableLockChain.sol:OwnableLockChain
 Update the contractAddress and YOUR_INFURA_PROJECT_ID in index.html to match your contract’s deployed address and Infura (or other RPC) details.
+
+Below is a bash example of how you can manually export the variables in your shell without specifying a fork URL. Adjust the values as needed:
+
+bash
+export PRIVATE_KEY="0x123456789abcdef..."
+export RPC_URL="https://sepolia.infura.io/v3/YOUR_PROJECT_ID"
+export ETHERSCAN_API_KEY="YOUR_ETHERSCAN_API_KEY"
+
+Then you can run:
+
+forge script script/Deploy.s.sol:DeployScript --rpc-url $RPC_URL --broadcast --verify -vvvv
 
 Usage
 Open index.html in a Browser:
@@ -84,17 +93,18 @@ Connect Wallet:
 Click Connect MetaMask or Connect Coinbase Wallet to authorize your wallet. If using a mobile device, open the site inside the wallet’s in-app browser.
 
 Register a Document:
-
 Select a PDF file using the Hash Document button.
 Once hashed, click Register Hash on Blockchain to register the file’s hash.
 Pay the fee and gas in your connected wallet.
-Verify a Document:
 
+Verify a Document:
 Select the same document again or provide a known hash.
 If registered, the app displays the registrant address and timestamp.
+
 Security & Disclaimer
 Use at your own risk. LockChain is provided as-is, and you are responsible for securing your private keys and understanding gas costs.
 Always test with a test network (like Sepolia) before using mainnet.
+
 License
 This project is licensed under the MIT License - see the LICENSE file for details.
 
